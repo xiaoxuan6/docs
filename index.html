@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xiaoxuan‘s - docs</title>
+    <link rel="icon" href="https://fav.farm/🚜"/>
+    <meta name="description" content='xiaoxuan‘s 的文档列表'>
+    <meta name="anthor" content="xiaoxuan6">
+    <link href="/static/css/tailwind-2.2.19.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/notiflix-3.2.6.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css">
+    <style>
+        li {
+            margin-right: 10px;
+            border: 1px solid #666; /* 黑色边框 */
+            padding: 5px; /* 列表项的内边距 */
+            border-radius: 8px; /* 设置四个圆角的半径 */
+        }
+
+        ul.flex {
+            flex-wrap: wrap;
+        }
+
+        li:hover {
+            background-color: #666; /* 鼠标悬停时的背景色 */
+            color: #fff; /* 鼠标悬停时的文字颜色 */
+        }
+    </style>
+</head>
+
+<body class="bg-gray-200 p-4">
+
+<div id="app">
+</div>
+
+<script src="/static/js/jquery.min.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="/static/js/notiflix-3.2.6.min.js"></script>
+<script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
+<script>
+    $(function () {
+        NProgress.start();
+        axios.get('/api/docs').then(function (response) {
+            let data = response.data;
+            console.log('data', data)
+            if (data.status !== 200) {
+                NProgress.done();
+                Notiflix.Notify.failure(data.msg);
+            } else {
+                let html = '';
+                let items = JSON.parse(JSON.stringify(data.data));
+                $.each(items, function (index, item) {
+                    html += '<h1 class="text-2xl md:text-4xl font-bold mb-4">' + index + '</h1>';
+                    html += '<div class="bg-white p-6 rounded-lg mb-4 shadow">';
+                    html += '<ul class="mb-4 flex">';
+                    $.each(item, function (index, item) {
+                        html += '<li class="mb-4 overflow-wrap"><a href="' + item + '" target="_blank">' + index + '</a></li>';
+                    });
+                    html += '</ul>';
+                    html += '</div>';
+                });
+                document.getElementById('app').innerHTML = html;
+                NProgress.done();
+            }
+        });
+    });
+</script>
+</body>
+</html>
