@@ -8,6 +8,7 @@ import (
     "github.com/tidwall/gjson"
     "net/http"
     "os"
+    "strings"
 )
 
 type Response struct {
@@ -33,16 +34,31 @@ func Api(w http.ResponseWriter, r *http.Request) {
     item := response.String()
     files := gjson.Get(item, "files").String()
 
+    if len(files) < 1 {
+        body, _ := json.Marshal(&Response{
+            500,
+            "暂无数据",
+            nil,
+        })
+        _, _ = w.Write(body)
+        return
+    }
+
     body := map[string]map[string]string{
         "docs.json": map[string]string{},
     }
     _ = json.NewDecoder(bytes.NewBufferString(files)).Decode(&body)
     content := body["docs.json"]["content"]
+    content = strings.ReplaceAll(content, `\n`, "")
+    content = strings.ReplaceAll(content, `\"`, `"`)
+
+    var bods map[string]map[string]string
+    _ = json.Unmarshal([]byte(content), &bods)
 
     b, _ := json.Marshal(&Response{
         200,
         "ok",
-        content,
+        bods,
     })
     _, _ = w.Write(b)
 }
